@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Demo I/O Chat App</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
+    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var socket=io.connect();
+            
+            /*  Beggining Of The One To One Chat  */
+            $("#BtnSend").click(function(){
+                $("#messageValidate").empty();
+                if($("#message").val().trim()=="" || $("#message").val().trim()==null)
+                {
+                    $("#messageValidate").html("Message Cannot be BLANK..!!");
+                }
+                else
+                {
+                    socket.emit('send message',$("#message").val(),x);
+                    $("#message").val('');
+                }
+            });
+
+            socket.on('New Message',(data)=>{
+
+                var today = new Date();
+                var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
+                if($("#chat div:last-of-type").hasClass("primarycolor"))
+                {
+                    $("#chat").append(
+                                    "<div class='mywell warningcolor text-right'>"+data.x+":"+data.msg+"</br>"+time+"</div>"
+                                 );
+                }
+                else
+                {
+                    $("#chat").append(
+                                    "<div class='mywell primarycolor text-left'>"+data.x+":"+data.msg+"</br>"+time+"</div>"
+                                 );
+                }
+                console.log(data);
+            });
+
+            socket.on('ownmassage',(data)=>{
+
+                    var today = new Date();
+                    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
+                    if($("#chat div:last-of-type").hasClass("primarycolor"))
+                    {
+                        $("#chat").append(
+                                        "<div class='mywell warningcolor text-right'>"+data.x+":"+data.msg+"</br>"+time+"</br>massage is send to : "+data.y+"</div>"
+                                    );
+                    }
+                    else
+                    {
+                        $("#chat").append(
+                                        "<div class='mywell primarycolor text-left'>"+data.x+":"+data.msg+"</br>"+time+"</br>massage is send to : "+data.y+"</div>"
+                                    );
+                    }
+                    console.log(data);
+                    });
+
+
+
+           
+
+            $("#BtnSubmit").click(function(){
+                $("#txtUsernameValidate").empty();
+                if($("#txtUsername").val()=="" || $("#txtUsername").val()==null)
+                {
+                    $("#txtUsernameValidate").html("Username Cannot Be BLANK..!!");
+                }
+                else
+                {
+                    x=$("#txtUsername").val();
+                    socket.emit('New User',{name:$("#txtUsername").val()},(data)=>{
+                        $("#userForm").hide(200);
+                        $("#messageForm").show(200);
+                        $("#groupMessageForm").hide(200);
+                        $("#select").show(200);
+                    });
+                }
+            });
+
+            socket.on('joinmassage',function(data){
+                $("#join").append(data.msg);
+                //alert(data.msg);
+            });
+
+            $(document).on("click","#abc",function(){ 
+               var val= $(this).attr('user1'); 
+                socket.emit('joinroom',{val})
+                    
+            });
+            var x;
+            socket.on('Get Users',function(data){
+                $("#users").empty();
+                data = JSON.parse(data.temp);
+                for(var i=0;i<data.length;i++)
+                {
+                    if(data[i]!=x)
+                    {
+                    $("#users").append("<li class='list-group-item'><a id='abc' user1='"+data[i]+"'>"+data[i]+"</a></li>");
+                    }
+
+                  $( "#users" ).click(function( event ) {
+                    var target = $( event.target );
+                    $("#users li").css( "background-color", "white" );
+                    if ( target.is( "li" ) ) {
+                        target.css( "background-color", "teal" );
+                        target.css( "Color", "white" );
+                    }
+                    });
+                }
+
+            });
+            /*  End Of The One To One Chat  */
+            /*$("#private").click(function(){
+                alert("51684");
+                var socketss = io.connect('http://localhost:5000/#messageForm');
+                $("#userForm").hide(200);
+                $("#messageForm").show(200);
+                $("#groupMessageForm").hide(200);
+
+
+                /*  Beggining Of The One To One Chat  
+            $("#BtnSend").click(function(){
+                $("#messageValidate").empty();
+                if($("#message").val().trim()=="" || $("#message").val().trim()==null)
+                {
+                    $("#messageValidate").html("Message Cannot be BLANK..!!");
+                }
+                else
+                {
+                    socketss.emit('send message',$("#message").val(),x);
+                    $("#message").val('');
+                }
+            });
+
+            socketss.on('New Message',(data)=>{
+
+                var today = new Date();
+                var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
+                if($("#chat div:last-of-type").hasClass("primarycolor"))
+                {
+                    $("#chat").append(
+                                    "<div class='mywell warningcolor text-right'>"+data.x+":"+data.msg+"</br>"+time+"</div>"
+                                 );
+                }
+                else
+                {
+                    $("#chat").append(
+                                    "<div class='mywell primarycolor text-left'>"+data.x+":"+data.msg+"</br>"+time+"</div>"
+                                 );
+                }
+                console.log(data);
+            });
+
+            socketss.on('ownmassage',(data)=>{
+
+                    var today = new Date();
+                    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
+                    if($("#chat div:last-of-type").hasClass("primarycolor"))
+                    {
+                        $("#chat").append(
+                                        "<div class='mywell warningcolor text-right'>"+data.x+":"+data.msg+"</br>"+time+"</br>massage is send to : "+data.y+"</div>"
+                                    );
+                    }
+                    else
+                    {
+                        $("#chat").append(
+                                        "<div class='mywell primarycolor text-left'>"+data.x+":"+data.msg+"</br>"+time+"</br>massage is send to : "+data.y+"</div>"
+                                    );
+                    }
+                    console.log(data);
+                    });
+
+
+
+           
+
+            $("#BtnSubmit").click(function(){
+                $("#txtUsernameValidate").empty();
+                if($("#txtUsername").val()=="" || $("#txtUsername").val()==null)
+                {
+                    $("#txtUsernameValidate").html("Username Cannot Be BLANK..!!");
+                }
+                else
+                {
+                    x=$("#txtUsername").val();
+                    socketss.emit('New User',{name:$("#txtUsername").val()},(data)=>{
+                        $("#userForm").hide(200);
+                        $("#messageForm").show(200);
+                        $("#groupMessageForm").hide(200);
+                    });
+                }
+            });
+
+            socketss.on('joinmassage',function(data){
+                $("#join").append(data.msg);
+                //alert(data.msg);
+            });
+
+            $(document).on("click","#abc",function(){ 
+               var val= $(this).attr('user1'); 
+                socketss.emit('joinroom',{val})
+                    
+            });
+            var x;
+            socketss.on('Get Users',function(data){
+                $("#users").empty();
+                data = JSON.parse(data.temp);
+                for(var i=0;i<data.length;i++)
+                {
+                    if(data[i]!=x)
+                    {
+                    $("#users").append("<li class='list-group-item'><a id='abc' user1='"+data[i]+"'>"+data[i]+"</a></li>");
+                    }
+
+                  $( "#users" ).click(function( event ) {
+                    var target = $( event.target );
+                    $("#users li").css( "background-color", "white" );
+                    if ( target.is( "li" ) ) {
+                        target.css( "background-color", "teal" );
+                        target.css( "Color", "white" );
+                    }
+                    });
+                }
+
+            });
+
+
+
+            });
+
+            /*  Beggining Of The Group Chat  */
+            /*  Bridge Between Private And Group  */
+            var username ;
+            function promptcall(){
+                var person= prompt("Please Enter Your Name: ");
+                if (person== null || person== "") {
+                    promptcall();
+                } else {
+                    username = person;
+                    alert(username);
+                }
+            }
+            /*$("#group").click(function(){
+                alert("fdhd");
+                var sockets = io.connect('http://localhost:5000/#groupMessageForm');
+
+                // on connection to server, ask for user's name with an anonymous callback
+                socket.on('connect', function(){
+                    /*$("#userForm").hide(200);
+                    $("#messageForm").hide(200);
+                    $("#groupMessageForm").show(200);
+
+                    */user = promptcall();
+                    console.log("======>>>>>"+username);
+                    socket.emit('adduser',{users:username}); 
+
+                $('#datasend').click( function() {
+                    var message = $('#data').val();
+                    $('#data').val('');
+                    // tell server to execute 'sendchat' and send along one parameter
+                    socket.emit('sendchat', message);
+                });
+
+                // when the client hits ENTER on their keyboard
+                $('#data').keypress(function(e) {
+                    if(e.which == 13) {
+                        $(this).blur();
+                        $('#datasend').focus().click();
+                    }
+                });
+
+                socket.on('updatechat', function (username, data) {
+                $('#conversation').append('<b>'+username + ': </b> ' + data + '<br>');
+            });
+
+	        // listener, whenever the server emits 'updaterooms', this updates the room the client is in
+            socket.on('updaterooms', function(rooms, current_room) {
+                $('#rooms').empty();
+                
+                $.each(rooms, function(key, value) {
+                    if(value == current_room){
+                        $('#rooms').append('<div>' + value + '</div>');
+                    }
+                    else {
+                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                    }
+                });
+            });
+
+                function switchRoom(room){
+                    socket.emit('switchRoom', room);
+                }
+
+
+        $("#select input").on("change",function(){
+            alert($( "input:checked" ).val());
+            if($("input:checked").val() == "private"){
+                $("#messageForm").show(200);
+                $("#groupMessageForm").hide(200);
+                $("#select").show(200);
+            }
+            else if($("input:checked").val() == "group"){
+                $("#messageForm").hide(200);
+                $("#groupMessageForm").show(200);
+                $("#select").show(200);
+            }
+        });
+
+    });
+            /*  End Of The Group Chat  */
+        
+    </script>
+<style type="text/css">
+    #messageForm,#groupMessageForm,#select{display:none;}
+    #chat{height:300px;overflow-y:auto;}
+    
+    .primarycolor{background-color: #ADD8E6 !important;color:navy;}
+
+    .warningcolor{background-color: #FFA0A0 !important;color:maroon;}
+
+    #users li:hover,#users li:focus{ cursor: pointer; }
+    #users li a:hover,#users li a:focus{color: #ADD8E6;}
+
+    .mywell{min-height: 20px;padding: 19px;margin-bottom: 20px;border: 1px solid #e3e3e3;border-radius: 4px;-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);box-shadow: inset 0 1px 1px rgba(0,0,0,.05);width:auto;}
+
+</style>
+</head>
+<body style="margin-top:50px;">
+    <div class="container"> 
+        <div class="row" id="userForm">
+            <div class="col-md-offset-4 col-md-4 well">
+                <i class="fa fa-user" style="color:navy"></i> &nbsp;<label>Username:</label>
+                <input type="text" placeholder="Enter Username Here..." class="form-control" id="txtUsername" maxlength="100" />
+                <small id="txtUsernameValidate" class="text-danger"></small>
+                <br/>
+                <a id="BtnSubmit" class="btn btn-primary"><i class="fa fa-sign-in"></i> Submit</a>
+            </div>
+        </div>
+
+        <div id="join">
+
+        </div>
+        <div id="select">
+            <input type="radio" name="option" id="private" value="private" checked/><label for="private"> Private</label>
+            <input type="radio" name="option" id="group" value="group" /><label for="group"> Group</label>
+        </div><br/>
+        <div id="messageForm">
+            <a class="btn btn-primary" type="button" id="group" href="#groupMessageForm" ><i class="fa fa-users"></i> Group</a>
+            <br/><br/>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="well">
+                        <h3><i class="fa fa-dot-circle-o" style="color:green;"></i> Live Users</h3>
+                        <ul class="list-group" id="users">
+                            
+                        </ul>
+                    </div>
+                </div>
+            
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <i class="fa fa-envelope" style="color:navy"></i> &nbsp;<label>Message</label>
+                        <textarea id="message" rows="5" class="form-control" placeholder="Enter Message Here.." maxlength="300"></textarea>
+                        <small id="messageValidate" class="text-danger"></small>
+                        <br/>
+                        <a id="BtnSend" class="btn btn-primary"><i class="fa fa-send"></i> Send Message</a>
+                    </div><hr/>
+                    <div class="chat" id="chat"></div>
+                </div>
+            </div>
+        </div>
+
+            <div id="groupMessageForm">
+                <a class="btn btn-primary" type="button" id="private" href="#messageForm" onclick="promptcall()"><i class="fa fa-user"></i> Private</a><br/><br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="well">
+                            <h3><i class="fa fa-users" style="color: green;"></i> Groups</h3>
+                            <ul class="list-group" id="rooms">
+                                
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <i class="fa fa-envelope" style="color:navy"></i> &nbsp;<label>Message</label>
+                            <textarea id="data" rows="5" class="form-control" placeholder="Enter Message Here.." maxlength="300"></textarea>
+                            <small id="messageValidate" class="text-danger"></small>
+                            <br/>
+                            <a id="datasend" class="btn btn-primary"><i class="fa fa-send"></i> Send Message</a>
+                        </div><hr/>
+                        <div class="chat" id="conversation"></div>
+                    </div>
+                </div>
+            </div> 
+            <!-- For One To One Chat-->
+        <!--
+            <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+                <h2><i class="fa fa-users"></i> ROOMS</h2>
+                <div id="rooms"></div>
+            </div>
+            <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+                <div id="conversation"></div>
+                <input id="data" style="width:200px;" />
+                <input type="button" id="datasend" value="send" />
+            </div>--> 
+    </div>
+</body>
+</html>
